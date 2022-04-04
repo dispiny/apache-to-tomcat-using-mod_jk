@@ -1,3 +1,4 @@
+#!/bin/bash
 yum install httpd-devel gcc gcc-c++ java-11-amazon-corretto.x86_64 -y
 wget -c https://dlcdn.apache.org/tomcat/tomcat-connectors/jk/tomcat-connectors-1.2.48-src.tar.gz
 tar zxvf tomcat-connector*
