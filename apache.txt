@@ -1,0 +1,43 @@
+yum install httpd-devel gcc gcc-c++ java-11-amazon-corretto.x86_64 -y
+wget -c https://dlcdn.apache.org/tomcat/tomcat-connectors/jk/tomcat-connectors-1.2.48-src.tar.gz
+tar zxvf tomcat-connector*
+cd tomcat-connetors-1.2.48-src/native
+./configure --with-apxs=/usr/bin/apxs
+make
+make install
+cp /home/ec2-user/tomcat-connectors-1.2.48-src/native/apache-2.0/mod_jk.so /usr/lib64/httpd/modules/
+cd /etc/httpd/conf
+
+cat << EOF > workers.properties
+workers.tomcat_home="/usr/share/tomcat"
+workers.java_home="/usr/lib/jvm/java-11-amazon-corretto.x86_64/bin/java"
+ps=/
+worker.list=ajp13
+worker.ajp13.port=8009
+worker.ajp13.host=back.wsi.local
+worker.ajp13.type=ajp13
+EOF
+
+cat << EOF > /etc/httpd/conf/mod_jk.conf
+<IfModule mod_jk.c>
+        JkWorkersFile /etc/httpd/conf/workers.properties
+        JkLogFile logs/mod_jk.log
+        JkAutoAlias "/usr/share/tomcat/webapps"
+        JkLogLevel info
+        JkMount /* ajp13
+        JkMount /*.jsp ajp13
+        JkMount /servlet/* ajp13
+        JkMount /examples/*.jsp ajp13
+        JkLogStampFormat "[%a %b %d %H:%M:%S %Y]"
+        JkOptions +ForwardKeySize +ForwardURICompat -ForwardDirectories
+        JkRequestLogFormat "%w %V %T"
+</IfModule>
+EOF
+
+cat << EOF >> /etc/httpd/conf/httpd.conf
+LoadModule jk_module modules/mod_jk.so
+include conf/mod_jk.conf
+EOF
+
+systemctl restart httpd
+
