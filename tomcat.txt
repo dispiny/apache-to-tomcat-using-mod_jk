@@ -1,8 +1,9 @@
+#!/bin/bash
 yum install tomcat java-11-amazon-corretto.x86_64  -y
 cp /usr/share/tomcat/conf/server.xml /usr/share/tomcat/conf/server.xml.bak 
 
 #### WEB SERVICE ####
-mv /dump ; cd /dump
+mkdir /dump ; cd /dump
 cat << EOF > /dump/index.jsp
 Hello World
 EOF
